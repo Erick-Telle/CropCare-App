@@ -1,8 +1,8 @@
-com.cropcare.core.ui-pngs-0 C:\Users\User\Documents\Programacion\Android\CropCare app\core\ui\build\generated\res\pngs\debug
-com.cropcare.core.ui-updated_navigation_xml-1 C:\Users\User\Documents\Programacion\Android\CropCare app\core\ui\build\generated\updated_navigation_xml\debug
-com.cropcare.core.ui-mergeDebugResources-2 C:\Users\User\Documents\Programacion\Android\CropCare app\core\ui\build\intermediates\incremental\debug\mergeDebugResources\merged.dir
-com.cropcare.core.ui-mergeDebugResources-3 C:\Users\User\Documents\Programacion\Android\CropCare app\core\ui\build\intermediates\incremental\debug\mergeDebugResources\stripped.dir
-com.cropcare.core.ui-debug-4 C:\Users\User\Documents\Programacion\Android\CropCare app\core\ui\build\intermediates\merged_res\debug\mergeDebugResources
-com.cropcare.core.ui-debug-5 C:\Users\User\Documents\Programacion\Android\CropCare app\core\ui\build\intermediates\packaged_res\debug\packageDebugResources
-com.cropcare.core.ui-debug-6 C:\Users\User\Documents\Programacion\Android\CropCare app\core\ui\src\debug\res
-com.cropcare.core.ui-main-7 C:\Users\User\Documents\Programacion\Android\CropCare app\core\ui\src\main\res
+com.cropcare.core.ui-pngs-0 C:\Users\YARITZA DIAZ\Documents\Proyecto Final\CropCare-App\CropCare-App\core\ui\build\generated\res\pngs\debug
+com.cropcare.core.ui-updated_navigation_xml-1 C:\Users\YARITZA DIAZ\Documents\Proyecto Final\CropCare-App\CropCare-App\core\ui\build\generated\updated_navigation_xml\debug
+com.cropcare.core.ui-mergeDebugResources-2 C:\Users\YARITZA DIAZ\Documents\Proyecto Final\CropCare-App\CropCare-App\core\ui\build\intermediates\incremental\debug\mergeDebugResources\merged.dir
+com.cropcare.core.ui-mergeDebugResources-3 C:\Users\YARITZA DIAZ\Documents\Proyecto Final\CropCare-App\CropCare-App\core\ui\build\intermediates\incremental\debug\mergeDebugResources\stripped.dir
+com.cropcare.core.ui-debug-4 C:\Users\YARITZA DIAZ\Documents\Proyecto Final\CropCare-App\CropCare-App\core\ui\build\intermediates\merged_res\debug\mergeDebugResources
+com.cropcare.core.ui-debug-5 C:\Users\YARITZA DIAZ\Documents\Proyecto Final\CropCare-App\CropCare-App\core\ui\build\intermediates\packaged_res\debug\packageDebugResources
+com.cropcare.core.ui-debug-6 C:\Users\YARITZA DIAZ\Documents\Proyecto Final\CropCare-App\CropCare-App\core\ui\src\debug\res
+com.cropcare.core.ui-main-7 C:\Users\YARITZA DIAZ\Documents\Proyecto Final\CropCare-App\CropCare-App\core\ui\src\main\res

@@ -1,0 +1,1 @@
+-keep,allowobfuscation,allowshrinking class com.cropcare.feature.settings.general.GeneralSettingsViewModel

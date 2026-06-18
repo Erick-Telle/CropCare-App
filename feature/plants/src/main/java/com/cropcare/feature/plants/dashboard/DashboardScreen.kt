@@ -12,8 +12,10 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -35,13 +37,21 @@ import com.cropcare.core.ui.components.PrimaryButton
 fun DashboardScreen(
     onAddPlant: () -> Unit,
     onPlantClick: (Long) -> Unit,
+    onOpenSettings: () -> Unit,
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = {
-            CropCareTopAppBar(title = "CropCare")
+            CropCareTopAppBar(
+                title = "CropCare",
+                actions = {
+                    IconButton(onClick = onOpenSettings) {
+                        Icon(Icons.Default.Settings, contentDescription = "Configuración")
+                    }
+                }
+            )
         },
         floatingActionButton = {
             FloatingActionButton(
@@ -82,14 +92,14 @@ fun DashboardScreen(
                             horizontalArrangement = Arrangement.spacedBy(12.dp),
                             contentPadding = PaddingValues(vertical = 8.dp)
                         ) {
-                            items(uiState.todayPlants, key = { it.plant.id }) { item ->
+                            items(uiState.todayPlants, key = { it.plantWithStatus.plant.id }) { item ->
                                 PlantCard(
-                                    plantName = item.plant.nombre,
+                                    plantName = item.plantWithStatus.plant.nombre,
                                     speciesName = item.speciesName,
-                                    status = item.plant.estadoRiego,
-                                    photoPath = item.plant.fotoPath,
+                                    status = item.plantWithStatus.status,
+                                    photoPath = item.plantWithStatus.plant.fotoPath,
                                     modifier = Modifier.width(160.dp),
-                                    onClick = { onPlantClick(item.plant.id) }
+                                    onClick = { onPlantClick(item.plantWithStatus.plant.id) }
                                 )
                             }
                         }
@@ -116,13 +126,13 @@ fun DashboardScreen(
                     }
                 }
 
-                items(uiState.upcomingPlants, key = { it.plant.id }) { item ->
+                items(uiState.upcomingPlants, key = { it.plantWithStatus.plant.id }) { item ->
                     PlantListItem(
-                        plantName = item.plant.nombre,
+                        plantName = item.plantWithStatus.plant.nombre,
                         speciesName = item.speciesName,
-                        status = item.plant.estadoRiego,
+                        status = item.plantWithStatus.status,
                         nextWateringText = item.nextWateringText,
-                        onClick = { onPlantClick(item.plant.id) }
+                        onClick = { onPlantClick(item.plantWithStatus.plant.id) }
                     )
                 }
 

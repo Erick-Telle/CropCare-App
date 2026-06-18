@@ -1,9 +1,12 @@
 package com.cropcare.feature.plants.detail;
 
 import androidx.lifecycle.SavedStateHandle;
+import com.cropcare.core.domain.usecase.GetNextWateringDateUseCase;
 import com.cropcare.core.domain.usecase.GetPlantByIdUseCase;
+import com.cropcare.core.domain.usecase.GetPlantWateringStatusUseCase;
 import com.cropcare.core.domain.usecase.GetSpeciesByIdUseCase;
-import com.cropcare.core.domain.usecase.GetWateringRecordsUseCase;
+import com.cropcare.core.domain.usecase.GetWateringHistoryUseCase;
+import com.cropcare.core.domain.usecase.RegisterWateringUseCase;
 import com.cropcare.core.domain.usecase.SavePlantUseCase;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
@@ -35,39 +38,57 @@ public final class PlantDetailViewModel_Factory implements Factory<PlantDetailVi
 
   private final Provider<GetSpeciesByIdUseCase> getSpeciesByIdUseCaseProvider;
 
-  private final Provider<GetWateringRecordsUseCase> getWateringRecordsUseCaseProvider;
+  private final Provider<GetWateringHistoryUseCase> getWateringHistoryUseCaseProvider;
 
   private final Provider<SavePlantUseCase> savePlantUseCaseProvider;
+
+  private final Provider<RegisterWateringUseCase> registerWateringUseCaseProvider;
+
+  private final Provider<GetNextWateringDateUseCase> getNextWateringDateUseCaseProvider;
+
+  private final Provider<GetPlantWateringStatusUseCase> getPlantWateringStatusUseCaseProvider;
 
   private PlantDetailViewModel_Factory(Provider<SavedStateHandle> savedStateHandleProvider,
       Provider<GetPlantByIdUseCase> getPlantByIdUseCaseProvider,
       Provider<GetSpeciesByIdUseCase> getSpeciesByIdUseCaseProvider,
-      Provider<GetWateringRecordsUseCase> getWateringRecordsUseCaseProvider,
-      Provider<SavePlantUseCase> savePlantUseCaseProvider) {
+      Provider<GetWateringHistoryUseCase> getWateringHistoryUseCaseProvider,
+      Provider<SavePlantUseCase> savePlantUseCaseProvider,
+      Provider<RegisterWateringUseCase> registerWateringUseCaseProvider,
+      Provider<GetNextWateringDateUseCase> getNextWateringDateUseCaseProvider,
+      Provider<GetPlantWateringStatusUseCase> getPlantWateringStatusUseCaseProvider) {
     this.savedStateHandleProvider = savedStateHandleProvider;
     this.getPlantByIdUseCaseProvider = getPlantByIdUseCaseProvider;
     this.getSpeciesByIdUseCaseProvider = getSpeciesByIdUseCaseProvider;
-    this.getWateringRecordsUseCaseProvider = getWateringRecordsUseCaseProvider;
+    this.getWateringHistoryUseCaseProvider = getWateringHistoryUseCaseProvider;
     this.savePlantUseCaseProvider = savePlantUseCaseProvider;
+    this.registerWateringUseCaseProvider = registerWateringUseCaseProvider;
+    this.getNextWateringDateUseCaseProvider = getNextWateringDateUseCaseProvider;
+    this.getPlantWateringStatusUseCaseProvider = getPlantWateringStatusUseCaseProvider;
   }
 
   @Override
   public PlantDetailViewModel get() {
-    return newInstance(savedStateHandleProvider.get(), getPlantByIdUseCaseProvider.get(), getSpeciesByIdUseCaseProvider.get(), getWateringRecordsUseCaseProvider.get(), savePlantUseCaseProvider.get());
+    return newInstance(savedStateHandleProvider.get(), getPlantByIdUseCaseProvider.get(), getSpeciesByIdUseCaseProvider.get(), getWateringHistoryUseCaseProvider.get(), savePlantUseCaseProvider.get(), registerWateringUseCaseProvider.get(), getNextWateringDateUseCaseProvider.get(), getPlantWateringStatusUseCaseProvider.get());
   }
 
   public static PlantDetailViewModel_Factory create(
       Provider<SavedStateHandle> savedStateHandleProvider,
       Provider<GetPlantByIdUseCase> getPlantByIdUseCaseProvider,
       Provider<GetSpeciesByIdUseCase> getSpeciesByIdUseCaseProvider,
-      Provider<GetWateringRecordsUseCase> getWateringRecordsUseCaseProvider,
-      Provider<SavePlantUseCase> savePlantUseCaseProvider) {
-    return new PlantDetailViewModel_Factory(savedStateHandleProvider, getPlantByIdUseCaseProvider, getSpeciesByIdUseCaseProvider, getWateringRecordsUseCaseProvider, savePlantUseCaseProvider);
+      Provider<GetWateringHistoryUseCase> getWateringHistoryUseCaseProvider,
+      Provider<SavePlantUseCase> savePlantUseCaseProvider,
+      Provider<RegisterWateringUseCase> registerWateringUseCaseProvider,
+      Provider<GetNextWateringDateUseCase> getNextWateringDateUseCaseProvider,
+      Provider<GetPlantWateringStatusUseCase> getPlantWateringStatusUseCaseProvider) {
+    return new PlantDetailViewModel_Factory(savedStateHandleProvider, getPlantByIdUseCaseProvider, getSpeciesByIdUseCaseProvider, getWateringHistoryUseCaseProvider, savePlantUseCaseProvider, registerWateringUseCaseProvider, getNextWateringDateUseCaseProvider, getPlantWateringStatusUseCaseProvider);
   }
 
   public static PlantDetailViewModel newInstance(SavedStateHandle savedStateHandle,
       GetPlantByIdUseCase getPlantByIdUseCase, GetSpeciesByIdUseCase getSpeciesByIdUseCase,
-      GetWateringRecordsUseCase getWateringRecordsUseCase, SavePlantUseCase savePlantUseCase) {
-    return new PlantDetailViewModel(savedStateHandle, getPlantByIdUseCase, getSpeciesByIdUseCase, getWateringRecordsUseCase, savePlantUseCase);
+      GetWateringHistoryUseCase getWateringHistoryUseCase, SavePlantUseCase savePlantUseCase,
+      RegisterWateringUseCase registerWateringUseCase,
+      GetNextWateringDateUseCase getNextWateringDateUseCase,
+      GetPlantWateringStatusUseCase getPlantWateringStatusUseCase) {
+    return new PlantDetailViewModel(savedStateHandle, getPlantByIdUseCase, getSpeciesByIdUseCase, getWateringHistoryUseCase, savePlantUseCase, registerWateringUseCase, getNextWateringDateUseCase, getPlantWateringStatusUseCase);
   }
 }

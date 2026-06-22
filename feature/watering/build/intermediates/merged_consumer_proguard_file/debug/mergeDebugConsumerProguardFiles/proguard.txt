@@ -1,2 +1,0 @@
--keep,allowobfuscation,allowshrinking class com.cropcare.feature.watering.history.WateringHistoryViewModel
--keep,allowobfuscation,allowshrinking class com.cropcare.feature.watering.history.WateringHistoryViewModel

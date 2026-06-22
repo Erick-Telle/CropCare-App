@@ -1,1 +1,0 @@
--keep,allowobfuscation,allowshrinking class com.cropcare.feature.plants.splash.SplashViewModel

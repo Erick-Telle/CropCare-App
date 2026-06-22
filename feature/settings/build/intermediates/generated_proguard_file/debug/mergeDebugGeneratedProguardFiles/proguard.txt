@@ -1,4 +1,0 @@
--keep,allowobfuscation,allowshrinking class com.cropcare.feature.settings.climate.ClimateConfigViewModel
--keep,allowobfuscation,allowshrinking class com.cropcare.feature.settings.climate.ClimateConfigViewModel
--keep,allowobfuscation,allowshrinking class com.cropcare.feature.settings.general.GeneralSettingsViewModel
--keep,allowobfuscation,allowshrinking class com.cropcare.feature.settings.general.GeneralSettingsViewModel

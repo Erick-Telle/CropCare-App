@@ -1,11 +1,8 @@
 package com.cropcare.feature.plants.form
 
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -35,7 +32,6 @@ import com.cropcare.core.ui.components.InputField
 import com.cropcare.core.ui.components.LoadingView
 import com.cropcare.core.ui.components.PrimaryButton
 
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun PlantFormScreen(
     onNavigateBack: () -> Unit,
@@ -87,34 +83,35 @@ fun PlantFormScreen(
                     errorMessage = state.nombreError
                 )
 
-                Box(modifier = Modifier.clickable { onNavigateToSpeciesCatalog() }) {
-                    InputField(
-                        value = state.especieNombre.ifEmpty { "Seleccionar especie" },
-                        onValueChange = {},
-                        label = "Especie",
-                        readOnly = true,
-                        isError = state.especieError != null,
-                        errorMessage = state.especieError,
-                        trailingIcon = {
-                            Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                        }
-                    )
-                }
+                InputField(
+                    value = state.especieNombre.ifEmpty { "Seleccionar especie" },
+                    onValueChange = {},
+                    label = "Especie",
+                    readOnly = true,
+                    isError = state.especieError != null,
+                    errorMessage = state.especieError,
+                    trailingIcon = {
+                        Icon(Icons.Default.ArrowDropDown, contentDescription = null)
+                    },
+                    onClick = onNavigateToSpeciesCatalog
+                )
 
                 Text(
                     text = "Ubicación",
                     style = MaterialTheme.typography.titleMedium
                 )
-                FlowRow(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    PlantLocation.entries.forEach { location ->
-                        FilterChip(
-                            selected = state.ubicacion == location,
-                            onClick = { viewModel.onUbicacionChange(location) },
-                            label = { Text(locationLabel(location)) }
-                        )
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    PlantLocation.entries.chunked(2).forEach { rowLocations ->
+                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                            rowLocations.forEach { location ->
+                                FilterChip(
+                                    selected = state.ubicacion == location,
+                                    onClick = { viewModel.onUbicacionChange(location) },
+                                    label = { Text(locationLabel(location)) },
+                                    modifier = Modifier.weight(1f)
+                                )
+                            }
+                        }
                     }
                 }
 

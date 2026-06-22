@@ -2,7 +2,11 @@ package com.cropcare.feature.plants.navigation
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -16,6 +20,8 @@ import com.cropcare.feature.plants.form.PlantFormViewModel
 import com.cropcare.feature.plants.onboarding.OnboardingClimateScreen
 import com.cropcare.feature.plants.onboarding.OnboardingWelcomeScreen
 import com.cropcare.feature.plants.splash.SplashScreen
+import com.cropcare.feature.settings.navigation.SettingsRoutes
+import com.cropcare.feature.watering.navigation.WateringRoutes
 
 fun NavGraphBuilder.plantsGraph(navController: NavHostController) {
     composable(PlantsRoutes.SPLASH) {
@@ -54,7 +60,8 @@ fun NavGraphBuilder.plantsGraph(navController: NavHostController) {
             onAddPlant = { navController.navigate(PlantsRoutes.ADD_PLANT) },
             onPlantClick = { plantId ->
                 navController.navigate(PlantsRoutes.plantDetailRoute(plantId))
-            }
+            },
+            onOpenSettings = { navController.navigate(SettingsRoutes.GENERAL_SETTINGS) }
         )
     }
 
@@ -83,6 +90,9 @@ fun NavGraphBuilder.plantsGraph(navController: NavHostController) {
             onNavigateBack = { navController.popBackStack() },
             onEditPlant = { plantId ->
                 navController.navigate(PlantsRoutes.editPlantRoute(plantId))
+            },
+            onViewWateringHistory = { plantId ->
+                navController.navigate(WateringRoutes.wateringHistoryRoute(plantId))
             }
         )
     }
@@ -93,10 +103,10 @@ fun NavGraphBuilder.plantsGraph(navController: NavHostController) {
             onSpeciesSelected = { speciesId, speciesName ->
                 navController.previousBackStackEntry
                     ?.savedStateHandle
-                    ?.set(PlantsRoutes.SELECTED_SPECIES_ID, speciesId)
-                navController.previousBackStackEntry
-                    ?.savedStateHandle
-                    ?.set(PlantsRoutes.SELECTED_SPECIES_NAME, speciesName)
+                    ?.apply {
+                        set(PlantsRoutes.SELECTED_SPECIES_NAME, speciesName)
+                        set(PlantsRoutes.SELECTED_SPECIES_ID, speciesId)
+                    }
                 navController.popBackStack()
             }
         )
@@ -110,17 +120,17 @@ private fun PlantFormRoute(
     viewModel: PlantFormViewModel = hiltViewModel()
 ) {
     val savedStateHandle = navController.currentBackStackEntry?.savedStateHandle
+    val selectedSpeciesId by savedStateHandle
+        ?.getStateFlow<Long?>(PlantsRoutes.SELECTED_SPECIES_ID, null)
+        ?.collectAsStateWithLifecycle(initialValue = null)
+        ?: remember { mutableStateOf<Long?>(null) }
 
-    LaunchedEffect(savedStateHandle) {
-        savedStateHandle?.getStateFlow<Long?>(PlantsRoutes.SELECTED_SPECIES_ID, null)
-            ?.collect { speciesId ->
-                if (speciesId != null) {
-                    val speciesName = savedStateHandle.get<String>(PlantsRoutes.SELECTED_SPECIES_NAME) ?: ""
-                    viewModel.onSpeciesSelected(speciesId, speciesName)
-                    savedStateHandle.remove<Long>(PlantsRoutes.SELECTED_SPECIES_ID)
-                    savedStateHandle.remove<String>(PlantsRoutes.SELECTED_SPECIES_NAME)
-                }
-            }
+    LaunchedEffect(selectedSpeciesId) {
+        val speciesId = selectedSpeciesId ?: return@LaunchedEffect
+        val speciesName = savedStateHandle?.get<String>(PlantsRoutes.SELECTED_SPECIES_NAME).orEmpty()
+        viewModel.onSpeciesSelected(speciesId, speciesName)
+        savedStateHandle?.remove<Long>(PlantsRoutes.SELECTED_SPECIES_ID)
+        savedStateHandle?.remove<String>(PlantsRoutes.SELECTED_SPECIES_NAME)
     }
 
     PlantFormScreen(

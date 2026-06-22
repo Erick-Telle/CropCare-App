@@ -17,7 +17,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocalFlorist
-import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -45,6 +44,7 @@ import com.cropcare.core.ui.components.InputField
 import com.cropcare.core.ui.components.LoadingView
 import com.cropcare.core.ui.components.PrimaryButton
 import com.cropcare.core.ui.components.StatusChip
+import com.cropcare.feature.watering.quickwater.QuickWateringBottomSheet
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -53,25 +53,22 @@ import java.util.Locale
 fun PlantDetailScreen(
     onNavigateBack: () -> Unit,
     onEditPlant: (Long) -> Unit,
+    onViewWateringHistory: (Long) -> Unit,
     viewModel: PlantDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    if (uiState.showWateredPlaceholder) {
-        AlertDialog(
-            onDismissRequest = viewModel::dismissWateredPlaceholder,
-            title = { Text("Riego registrado") },
-            text = {
-                Text(
-                    // TODO: Reemplazar placeholder cuando MarkPlantAsWateredUseCase esté disponible (Dev 2)
-                    "Funcionalidad pendiente de integración con feature:watering."
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = viewModel::dismissWateredPlaceholder) {
-                    Text("Aceptar")
-                }
-            }
+    if (uiState.showWateringSheet && uiState.plant != null) {
+        QuickWateringBottomSheet(
+            plantName = uiState.plant!!.nombre,
+            suggestedWaterMl = uiState.plant!!.cantidadAguaMl,
+            waterAmount = uiState.wateringAmount,
+            onWaterAmountChange = viewModel::onWateringAmountChange,
+            notes = uiState.wateringNotes,
+            onNotesChange = viewModel::onWateringNotesChange,
+            isSaving = uiState.isRegisteringWatering,
+            onConfirm = viewModel::confirmWatering,
+            onDismiss = viewModel::dismissWateringSheet
         )
     }
 
@@ -170,8 +167,7 @@ fun PlantDetailScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                                 Text(
-                                    // TODO: Fecha real desde GetNextWateringDateUseCase (Dev 2)
-                                    text = "En ${plant.frecuenciaRiegoDias} días",
+                                    text = uiState.nextWateringText,
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.SemiBold
                                 )
@@ -203,7 +199,10 @@ fun PlantDetailScreen(
                     }
 
                     when (uiState.selectedTab) {
-                        0 -> HistoryTab(records = uiState.wateringRecords)
+                        0 -> HistoryTab(
+                            records = uiState.wateringRecords,
+                            onViewFullHistory = { onViewWateringHistory(plant.id) }
+                        )
                         1 -> TipsTab(species = species)
                         2 -> SettingsTab(
                             frequency = uiState.editFrequency,
@@ -221,7 +220,10 @@ fun PlantDetailScreen(
 }
 
 @Composable
-private fun HistoryTab(records: List<com.cropcare.core.domain.model.WateringRecord>) {
+private fun HistoryTab(
+    records: List<com.cropcare.core.domain.model.WateringRecord>,
+    onViewFullHistory: () -> Unit
+) {
     if (records.isEmpty()) {
         Column(
             modifier = Modifier
@@ -235,41 +237,47 @@ private fun HistoryTab(records: List<com.cropcare.core.domain.model.WateringReco
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Text(
-                // TODO: Datos completos desde GetWateringHistoryUseCase con filtros (Dev 2)
-                text = "El historial se completará con feature:watering",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Spacer(modifier = Modifier.height(8.dp))
+            TextButton(onClick = onViewFullHistory) {
+                Text("Ver historial completo")
+            }
         }
     } else {
-        LazyColumn(
-            modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            items(records, key = { it.id }) { record ->
-                Card(
-                    modifier = Modifier.fillMaxWidth(),
-                    colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surfaceVariant
-                    )
-                ) {
-                    Column(modifier = Modifier.padding(12.dp)) {
-                        Text(
-                            text = formatDate(record.timestamp),
-                            style = MaterialTheme.typography.titleSmall,
-                            fontWeight = FontWeight.Medium
+        Column {
+            TextButton(
+                onClick = onViewFullHistory,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            ) {
+                Text("Ver historial completo")
+            }
+            LazyColumn(
+                modifier = Modifier.padding(16.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(records, key = { it.id }) { record ->
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant
                         )
-                        Text(
-                            text = "${record.cantidadAguaMl} ml",
-                            style = MaterialTheme.typography.bodyMedium
-                        )
-                        if (record.notas != null) {
+                    ) {
+                        Column(modifier = Modifier.padding(12.dp)) {
                             Text(
-                                text = record.notas!!,
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                text = formatDate(record.timestamp),
+                                style = MaterialTheme.typography.titleSmall,
+                                fontWeight = FontWeight.Medium
                             )
+                            Text(
+                                text = "${record.cantidadAguaMl} ml",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            if (record.notas != null) {
+                                Text(
+                                    text = record.notas!!,
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
                         }
                     }
                 }

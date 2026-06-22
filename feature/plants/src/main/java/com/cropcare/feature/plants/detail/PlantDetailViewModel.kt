@@ -6,9 +6,12 @@ import androidx.lifecycle.viewModelScope
 import com.cropcare.core.domain.model.Plant
 import com.cropcare.core.domain.model.Species
 import com.cropcare.core.domain.model.WateringRecord
+import com.cropcare.core.domain.usecase.GetNextWateringDateUseCase
 import com.cropcare.core.domain.usecase.GetPlantByIdUseCase
+import com.cropcare.core.domain.usecase.GetPlantWateringStatusUseCase
 import com.cropcare.core.domain.usecase.GetSpeciesByIdUseCase
-import com.cropcare.core.domain.usecase.GetWateringRecordsUseCase
+import com.cropcare.core.domain.usecase.GetWateringHistoryUseCase
+import com.cropcare.core.domain.usecase.RegisterWateringUseCase
 import com.cropcare.core.domain.usecase.SavePlantUseCase
 import com.cropcare.feature.plants.navigation.PlantsRoutes
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -21,6 +24,9 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import javax.inject.Inject
 
 data class PlantDetailUiState(
@@ -31,7 +37,11 @@ data class PlantDetailUiState(
     val selectedTab: Int = 0,
     val editFrequency: String = "",
     val editWaterAmount: String = "",
-    val showWateredPlaceholder: Boolean = false,
+    val showWateringSheet: Boolean = false,
+    val wateringAmount: String = "",
+    val wateringNotes: String = "",
+    val isRegisteringWatering: Boolean = false,
+    val nextWateringText: String = "",
     val settingsSaved: Boolean = false
 )
 
@@ -40,8 +50,11 @@ class PlantDetailViewModel @Inject constructor(
     savedStateHandle: SavedStateHandle,
     private val getPlantByIdUseCase: GetPlantByIdUseCase,
     private val getSpeciesByIdUseCase: GetSpeciesByIdUseCase,
-    private val getWateringRecordsUseCase: GetWateringRecordsUseCase,
-    private val savePlantUseCase: SavePlantUseCase
+    private val getWateringHistoryUseCase: GetWateringHistoryUseCase,
+    private val savePlantUseCase: SavePlantUseCase,
+    private val registerWateringUseCase: RegisterWateringUseCase,
+    private val getNextWateringDateUseCase: GetNextWateringDateUseCase,
+    private val getPlantWateringStatusUseCase: GetPlantWateringStatusUseCase
 ) : ViewModel() {
 
     private val plantId: Long = checkNotNull(savedStateHandle[PlantsRoutes.ARG_PLANT_ID])
@@ -53,13 +66,18 @@ class PlantDetailViewModel @Inject constructor(
         viewModelScope.launch {
             combine(
                 getPlantByIdUseCase(plantId).filterNotNull(),
-                getWateringRecordsUseCase(plantId)
+                getWateringHistoryUseCase(plantId)
             ) { plant, records -> plant to records }
                 .flatMapLatest { (plant, records) ->
                     getSpeciesByIdUseCase(plant.especieId).filterNotNull()
                         .map { species -> Triple(plant, species, records) }
                 }
                 .collect { (plant, species, records) ->
+                    val lastWatering = records.firstOrNull()?.timestamp ?: plant.fechaCreacion
+                    val proximaFecha = getNextWateringDateUseCase(lastWatering, plant.frecuenciaRiegoDias)
+                    val diasRestantes = getPlantWateringStatusUseCase.calculateDaysRemaining(proximaFecha)
+                    val nextText = formatNextWateringText(diasRestantes, proximaFecha)
+
                     _uiState.update { current ->
                         PlantDetailUiState(
                             isLoading = false,
@@ -69,7 +87,16 @@ class PlantDetailViewModel @Inject constructor(
                             selectedTab = current.selectedTab,
                             editFrequency = plant.frecuenciaRiegoDias.toString(),
                             editWaterAmount = plant.cantidadAguaMl.toString(),
-                            showWateredPlaceholder = current.showWateredPlaceholder
+                            showWateringSheet = current.showWateringSheet,
+                            wateringAmount = if (current.wateringAmount.isEmpty()) {
+                                plant.cantidadAguaMl.toString()
+                            } else {
+                                current.wateringAmount
+                            },
+                            wateringNotes = current.wateringNotes,
+                            isRegisteringWatering = current.isRegisteringWatering,
+                            nextWateringText = nextText,
+                            settingsSaved = current.settingsSaved
                         )
                     }
                 }
@@ -107,11 +134,66 @@ class PlantDetailViewModel @Inject constructor(
     }
 
     fun markAsWatered() {
-        // TODO: Conectar con MarkPlantAsWateredUseCase (Dev 2 - feature:watering)
-        _uiState.update { it.copy(showWateredPlaceholder = true) }
+        val plant = _uiState.value.plant ?: return
+        _uiState.update {
+            it.copy(
+                showWateringSheet = true,
+                wateringAmount = plant.cantidadAguaMl.toString(),
+                wateringNotes = ""
+            )
+        }
     }
 
-    fun dismissWateredPlaceholder() {
-        _uiState.update { it.copy(showWateredPlaceholder = false) }
+    fun dismissWateringSheet() {
+        _uiState.update {
+            it.copy(
+                showWateringSheet = false,
+                wateringNotes = "",
+                isRegisteringWatering = false
+            )
+        }
+    }
+
+    fun onWateringAmountChange(value: String) {
+        _uiState.update { it.copy(wateringAmount = value) }
+    }
+
+    fun onWateringNotesChange(value: String) {
+        _uiState.update { it.copy(wateringNotes = value) }
+    }
+
+    fun confirmWatering() {
+        val state = _uiState.value
+        val amount = state.wateringAmount.toIntOrNull() ?: return
+        if (amount <= 0) return
+
+        viewModelScope.launch {
+            _uiState.update { it.copy(isRegisteringWatering = true) }
+            registerWateringUseCase(
+                plantId = plantId,
+                cantidadAguaMl = amount,
+                notas = state.wateringNotes.ifBlank { null }
+            )
+            _uiState.update {
+                it.copy(
+                    showWateringSheet = false,
+                    wateringNotes = "",
+                    wateringAmount = "",
+                    isRegisteringWatering = false
+                )
+            }
+        }
+    }
+
+    private fun formatNextWateringText(diasRestantes: Int, proximaFecha: Long): String = when {
+        diasRestantes < 0 -> "Atrasado desde ${formatDate(proximaFecha)}"
+        diasRestantes == 0 -> "Hoy"
+        diasRestantes == 1 -> "Mañana"
+        else -> "En $diasRestantes días (${formatDate(proximaFecha)})"
+    }
+
+    private fun formatDate(timestamp: Long): String {
+        val formatter = SimpleDateFormat("dd MMM", Locale("es", "ES"))
+        return formatter.format(Date(timestamp))
     }
 }

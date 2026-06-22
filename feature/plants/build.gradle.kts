@@ -27,6 +27,8 @@ android {
 dependencies {
     implementation(project(":core:domain"))
     implementation(project(":core:ui"))
+    implementation(project(":feature:watering"))
+    implementation(project(":feature:settings"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)

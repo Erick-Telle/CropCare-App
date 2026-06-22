@@ -2,10 +2,9 @@ package com.cropcare.feature.plants.dashboard
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.cropcare.core.domain.model.Plant
-import com.cropcare.core.domain.model.Species
+import com.cropcare.core.domain.model.PlantWithStatus
 import com.cropcare.core.domain.model.WateringStatus
-import com.cropcare.core.domain.usecase.GetAllPlantsUseCase
+import com.cropcare.core.domain.usecase.GetAllPlantsWithStatusUseCase
 import com.cropcare.core.domain.usecase.GetSpeciesCatalogUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -17,7 +16,7 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 data class PlantWithSpecies(
-    val plant: Plant,
+    val plantWithStatus: PlantWithStatus,
     val speciesName: String,
     val nextWateringText: String
 )
@@ -31,7 +30,7 @@ data class DashboardUiState(
 
 @HiltViewModel
 class DashboardViewModel @Inject constructor(
-    private val getAllPlantsUseCase: GetAllPlantsUseCase,
+    private val getAllPlantsWithStatusUseCase: GetAllPlantsWithStatusUseCase,
     private val getSpeciesCatalogUseCase: GetSpeciesCatalogUseCase
 ) : ViewModel() {
 
@@ -41,27 +40,25 @@ class DashboardViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             combine(
-                getAllPlantsUseCase(),
+                getAllPlantsWithStatusUseCase(),
                 getSpeciesCatalogUseCase()
-            ) { plants, speciesList ->
+            ) { plantsWithStatus, speciesList ->
                 val speciesMap = speciesList.associateBy { it.id }
-                plants.map { plant ->
-                    val species = speciesMap[plant.especieId]
+                plantsWithStatus.map { item ->
+                    val species = speciesMap[item.plant.especieId]
                     PlantWithSpecies(
-                        plant = plant,
+                        plantWithStatus = item,
                         speciesName = species?.nombreComun ?: "Especie desconocida",
-                        // TODO: Reemplazar con cálculo real desde GetPlantWateringStatusUseCase (Dev 2)
-                        nextWateringText = "Próximo riego: en ${plant.frecuenciaRiegoDias} días"
+                        nextWateringText = formatNextWateringText(item)
                     )
                 }
             }.collect { plantItems ->
-                // TODO: Filtrar "Hoy" con GetPlantsNeedingWaterTodayUseCase (Dev 2)
                 val today = plantItems.filter {
-                    it.plant.estadoRiego == WateringStatus.PENDIENTE ||
-                        it.plant.estadoRiego == WateringStatus.ATRASADA
+                    it.plantWithStatus.status == WateringStatus.PENDIENTE ||
+                        it.plantWithStatus.status == WateringStatus.ATRASADA
                 }
                 val upcoming = plantItems.filter {
-                    it.plant.estadoRiego == WateringStatus.AL_DIA
+                    it.plantWithStatus.status == WateringStatus.AL_DIA
                 }
                 _uiState.update {
                     DashboardUiState(
@@ -73,5 +70,12 @@ class DashboardViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    private fun formatNextWateringText(item: PlantWithStatus): String = when {
+        item.diasRestantes < 0 -> "Riego atrasado"
+        item.diasRestantes == 0 -> "Riego hoy"
+        item.diasRestantes == 1 -> "Próximo riego: mañana"
+        else -> "Próximo riego: en ${item.diasRestantes} días"
     }
 }

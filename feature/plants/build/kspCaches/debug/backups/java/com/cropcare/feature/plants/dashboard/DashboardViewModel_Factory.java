@@ -1,6 +1,6 @@
 package com.cropcare.feature.plants.dashboard;
 
-import com.cropcare.core.domain.usecase.GetAllPlantsUseCase;
+import com.cropcare.core.domain.usecase.GetAllPlantsWithStatusUseCase;
 import com.cropcare.core.domain.usecase.GetSpeciesCatalogUseCase;
 import dagger.internal.DaggerGenerated;
 import dagger.internal.Factory;
@@ -26,29 +26,31 @@ import javax.annotation.processing.Generated;
     "nullness:initialization.field.uninitialized"
 })
 public final class DashboardViewModel_Factory implements Factory<DashboardViewModel> {
-  private final Provider<GetAllPlantsUseCase> getAllPlantsUseCaseProvider;
+  private final Provider<GetAllPlantsWithStatusUseCase> getAllPlantsWithStatusUseCaseProvider;
 
   private final Provider<GetSpeciesCatalogUseCase> getSpeciesCatalogUseCaseProvider;
 
-  private DashboardViewModel_Factory(Provider<GetAllPlantsUseCase> getAllPlantsUseCaseProvider,
+  private DashboardViewModel_Factory(
+      Provider<GetAllPlantsWithStatusUseCase> getAllPlantsWithStatusUseCaseProvider,
       Provider<GetSpeciesCatalogUseCase> getSpeciesCatalogUseCaseProvider) {
-    this.getAllPlantsUseCaseProvider = getAllPlantsUseCaseProvider;
+    this.getAllPlantsWithStatusUseCaseProvider = getAllPlantsWithStatusUseCaseProvider;
     this.getSpeciesCatalogUseCaseProvider = getSpeciesCatalogUseCaseProvider;
   }
 
   @Override
   public DashboardViewModel get() {
-    return newInstance(getAllPlantsUseCaseProvider.get(), getSpeciesCatalogUseCaseProvider.get());
+    return newInstance(getAllPlantsWithStatusUseCaseProvider.get(), getSpeciesCatalogUseCaseProvider.get());
   }
 
   public static DashboardViewModel_Factory create(
-      Provider<GetAllPlantsUseCase> getAllPlantsUseCaseProvider,
+      Provider<GetAllPlantsWithStatusUseCase> getAllPlantsWithStatusUseCaseProvider,
       Provider<GetSpeciesCatalogUseCase> getSpeciesCatalogUseCaseProvider) {
-    return new DashboardViewModel_Factory(getAllPlantsUseCaseProvider, getSpeciesCatalogUseCaseProvider);
+    return new DashboardViewModel_Factory(getAllPlantsWithStatusUseCaseProvider, getSpeciesCatalogUseCaseProvider);
   }
 
-  public static DashboardViewModel newInstance(GetAllPlantsUseCase getAllPlantsUseCase,
+  public static DashboardViewModel newInstance(
+      GetAllPlantsWithStatusUseCase getAllPlantsWithStatusUseCase,
       GetSpeciesCatalogUseCase getSpeciesCatalogUseCase) {
-    return new DashboardViewModel(getAllPlantsUseCase, getSpeciesCatalogUseCase);
+    return new DashboardViewModel(getAllPlantsWithStatusUseCase, getSpeciesCatalogUseCase);
   }
 }

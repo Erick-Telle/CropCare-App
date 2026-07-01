@@ -1,6 +1,10 @@
 package com.cropcare.feature.plants.detail
 
+import com.cropcare.core.ui.components.CareAdviceCard
+import com.cropcare.core.ui.charts.LineAreaChart
+import com.cropcare.core.ui.charts.WateringHeatmap
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -9,14 +13,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Grass
 import androidx.compose.material.icons.filled.LocalFlorist
+import androidx.compose.material.icons.filled.WaterDrop
+import androidx.compose.material.icons.filled.WbSunny
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -39,6 +44,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
+import com.cropcare.core.ui.components.ChartCard
+import com.cropcare.core.ui.components.CircularWateringProgress
 import com.cropcare.core.ui.components.CropCareTopAppBar
 import com.cropcare.core.ui.components.InputField
 import com.cropcare.core.ui.components.LoadingView
@@ -156,25 +163,41 @@ fun PlantDetailScreen(
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.surfaceVariant
+                                containerColor = MaterialTheme.colorScheme.surfaceContainer
                             ),
-                            shape = RoundedCornerShape(12.dp)
+                            shape = RoundedCornerShape(20.dp)
                         ) {
-                            Column(modifier = Modifier.padding(16.dp)) {
-                                Text(
-                                    text = "Próximo riego",
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                                Text(
-                                    text = uiState.nextWateringText,
-                                    style = MaterialTheme.typography.titleMedium,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "Cantidad: ${plant.cantidadAguaMl} ml",
-                                    style = MaterialTheme.typography.bodyMedium
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp),
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Column(modifier = Modifier.weight(1f)) {
+                                    Text(
+                                        text = "Próximo riego",
+                                        style = MaterialTheme.typography.labelMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                    Text(
+                                        text = uiState.nextWateringText,
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.SemiBold
+                                    )
+                                    Spacer(modifier = Modifier.height(8.dp))
+                                    Text(
+                                        text = "Cantidad: ${plant.cantidadAguaMl} ml",
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
+                                CircularWateringProgress(
+                                    progress = computeWateringProgress(plant, uiState.wateringRecords),
+                                    status = plant.estadoRiego,
+                                    centerText = progressLabel(uiState.nextWateringText),
+                                    subText = "Progreso",
+                                    size = 96.dp
                                 )
                             }
                         }
@@ -224,60 +247,68 @@ private fun HistoryTab(
     records: List<com.cropcare.core.domain.model.WateringRecord>,
     onViewFullHistory: () -> Unit
 ) {
-    if (records.isEmpty()) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .verticalScroll(rememberScrollState())
+            .padding(16.dp),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        if (records.isEmpty()) {
             Text(
                 text = "Sin registros de riego",
                 style = MaterialTheme.typography.bodyLarge,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
-            Spacer(modifier = Modifier.height(8.dp))
             TextButton(onClick = onViewFullHistory) {
                 Text("Ver historial completo")
             }
-        }
-    } else {
-        Column {
-            TextButton(
-                onClick = onViewFullHistory,
-                modifier = Modifier.padding(horizontal = 8.dp)
+        } else {
+            ChartCard(
+                title = "Cantidad de agua",
+                subtitle = "Historial de riegos registrados"
             ) {
+                LineAreaChart(points = wateringLinePoints(records))
+            }
+
+            ChartCard(
+                title = "Consistencia",
+                subtitle = "Últimos 30 días"
+            ) {
+                WateringHeatmap(
+                    days = 30,
+                    wateredDays = wateringHeatmapDays(records)
+                )
+            }
+
+            TextButton(onClick = onViewFullHistory) {
                 Text("Ver historial completo")
             }
-            LazyColumn(
-                modifier = Modifier.padding(16.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                items(records, key = { it.id }) { record ->
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant
+
+            records.take(5).forEach { record ->
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
+                    ),
+                    shape = RoundedCornerShape(16.dp)
+                ) {
+                    Column(modifier = Modifier.padding(12.dp)) {
+                        Text(
+                            text = formatDate(record.timestamp),
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Medium
                         )
-                    ) {
-                        Column(modifier = Modifier.padding(12.dp)) {
+                        Text(
+                            text = "${record.cantidadAguaMl} ml",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                        if (record.notas != null) {
                             Text(
-                                text = formatDate(record.timestamp),
-                                style = MaterialTheme.typography.titleSmall,
-                                fontWeight = FontWeight.Medium
+                                text = record.notas!!,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                            Text(
-                                text = "${record.cantidadAguaMl} ml",
-                                style = MaterialTheme.typography.bodyMedium
-                            )
-                            if (record.notas != null) {
-                                Text(
-                                    text = record.notas!!,
-                                    style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
                         }
                     }
                 }
@@ -295,31 +326,32 @@ private fun TipsTab(species: com.cropcare.core.domain.model.Species) {
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        TipCard(title = "Luz", content = species.consejosLuz)
-        TipCard(title = "Humedad", content = species.consejosHumedad)
-        TipCard(title = "Abono", content = species.consejosAbono)
+        CareAdviceCard(
+            icon = Icons.Default.WbSunny,
+            title = "Luz",
+            description = species.consejosLuz
+        )
+        CareAdviceCard(
+            icon = Icons.Default.WaterDrop,
+            title = "Humedad",
+            description = species.consejosHumedad
+        )
+        CareAdviceCard(
+            icon = Icons.Default.Grass,
+            title = "Abono",
+            description = species.consejosAbono
+        )
     }
 }
 
-@Composable
-private fun TipCard(title: String, content: String) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
-        )
-    ) {
-        Column(modifier = Modifier.padding(16.dp)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                color = MaterialTheme.colorScheme.primary
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(text = content, style = MaterialTheme.typography.bodyMedium)
-        }
+private fun progressLabel(nextWateringText: String): String = when {
+    nextWateringText.startsWith("Atrasado") -> "Atrasado"
+    nextWateringText == "Hoy" -> "Hoy"
+    nextWateringText == "Mañana" -> "Mañana"
+    nextWateringText.startsWith("En ") -> {
+        nextWateringText.substringAfter("En ").substringBefore(" días").trim() + "d"
     }
+    else -> nextWateringText.take(8)
 }
 
 @Composable

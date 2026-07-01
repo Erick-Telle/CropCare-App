@@ -2,28 +2,36 @@ package com.cropcare.core.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val GreenPrimary = Color(0xFF2E7D32)
-val GreenPrimaryDark = Color(0xFF1B5E20)
-val GreenPrimaryLight = Color(0xFF66BB6A)
-val GreenSecondary = Color(0xFF558B2F)
-val GreenTertiary = Color(0xFF8BC34A)
+// Dark mode premium — fintech botanical
+val DarkBackground = Color(0xFF0A0F0D)
+val DarkSurface1 = Color(0xFF141A17)
+val DarkSurface2 = Color(0xFF1C2420)
+val DarkSurface3 = Color(0xFF252E29)
 
-val EarthBrown = Color(0xFF6D4C41)
-val EarthSand = Color(0xFFD7CCC8)
-val EarthCream = Color(0xFFF5F0E8)
-val LeafGreen = Color(0xFF4CAF50)
-val MossGreen = Color(0xFF33691E)
+val AccentEmerald = Color(0xFF34D399)
+val AccentEmeraldDim = Color(0xFF10B981)
+val AccentAmber = Color(0xFFFBBF24)
+val AccentTurquoise = Color(0xFF2DD4BF)
 
-val StatusOk = Color(0xFF43A047)
-val StatusPending = Color(0xFFFB8C00)
-val StatusOverdue = Color(0xFFE53935)
+val StatusOk = Color(0xFF34D399)
+val StatusPending = Color(0xFFFBBF24)
+val StatusOverdue = Color(0xFFFF6B6B)
 
-val BackgroundLight = Color(0xFFF8FAF5)
-val SurfaceLight = Color(0xFFFFFFFF)
-val BackgroundDark = Color(0xFF1A2318)
-val SurfaceDark = Color(0xFF243022)
+val OnDarkPrimary = Color(0xFFF0FDF4)
+val OnDarkSecondary = Color(0xB3FFFFFF)
+val OnDarkTertiary = Color(0x80FFFFFF)
 
-val OnPrimaryLight = Color(0xFFFFFFFF)
-val OnPrimaryDark = Color(0xFFE8F5E9)
-val OnBackgroundLight = Color(0xFF1C2B1E)
-val OnBackgroundDark = Color(0xFFE8F0E4)
+val CardBorderDark = Color(0x1AFFFFFF)
+val GlowGreen = Color(0x2634D399)
+
+// Light mode — clean botanical
+val LightBackground = Color(0xFFF5F7F5)
+val LightSurface1 = Color(0xFFFFFFFF)
+val LightSurface2 = Color(0xFFEEF2EE)
+val LightSurface3 = Color(0xFFE2E8E2)
+
+val LightPrimary = Color(0xFF059669)
+val LightPrimaryContainer = Color(0xFFD1FAE5)
+val OnLightPrimary = Color(0xFFFFFFFF)
+
+val CardBorderLight = Color(0x1A059669)

@@ -1,5 +1,6 @@
 package com.cropcare.feature.plants.onboarding
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -33,10 +34,13 @@ import com.cropcare.core.ui.components.PrimaryButton
 fun OnboardingWelcomeScreen(
     onContinue: () -> Unit
 ) {
-    Scaffold { padding ->
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
                 .padding(padding)
                 .padding(32.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -77,10 +81,13 @@ fun OnboardingClimateScreen(
 ) {
     val state by viewModel.climateState.collectAsStateWithLifecycle()
 
-    Scaffold { padding ->
+    Scaffold(
+        containerColor = MaterialTheme.colorScheme.background
+    ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(MaterialTheme.colorScheme.background)
                 .padding(padding)
                 .padding(24.dp)
                 .verticalScroll(rememberScrollState())

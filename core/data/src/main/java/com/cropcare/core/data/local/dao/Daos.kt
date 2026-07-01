@@ -47,6 +47,15 @@ interface SpeciesDao {
         """
     )
     fun searchSpeciesByName(query: String): Flow<List<SpeciesEntity>>
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertAllSpecies(species: List<SpeciesEntity>)
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertSpecies(species: SpeciesEntity)
+
+    @Query("SELECT COUNT(*) FROM species")
+    suspend fun getSpeciesCount(): Int
 }
 
 @Dao

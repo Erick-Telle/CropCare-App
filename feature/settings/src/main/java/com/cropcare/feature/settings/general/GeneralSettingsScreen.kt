@@ -120,7 +120,11 @@ fun GeneralSettingsScreen(
                     }
                     Switch(
                         checked = uiState.notificationsEnabled,
-                        onCheckedChange = viewModel::onNotificationsEnabledChange
+                        onCheckedChange = viewModel::onNotificationsEnabledChange,
+                        colors = androidx.compose.material3.SwitchDefaults.colors(
+                            checkedThumbColor = MaterialTheme.colorScheme.primary,
+                            checkedTrackColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.35f)
+                        )
                     )
                 }
                 HorizontalDivider()
@@ -181,9 +185,9 @@ private fun SettingsSection(
     Card(
         modifier = Modifier.fillMaxWidth(),
         colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            containerColor = MaterialTheme.colorScheme.surfaceContainer
         ),
-        shape = RoundedCornerShape(12.dp)
+        shape = RoundedCornerShape(20.dp)
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             content()

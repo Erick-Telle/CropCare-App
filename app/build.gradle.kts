@@ -46,6 +46,8 @@ dependencies {
     implementation(project(":feature:plants"))
     implementation(project(":feature:watering"))
     implementation(project(":feature:settings"))
+    implementation(project(":feature:notifications"))
+    implementation(project(":feature:catalog"))
 
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -60,6 +62,8 @@ dependencies {
 
     implementation(libs.hilt.android)
     ksp(libs.hilt.compiler)
+    implementation(libs.androidx.hilt.work)
+    ksp(libs.androidx.hilt.compiler)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

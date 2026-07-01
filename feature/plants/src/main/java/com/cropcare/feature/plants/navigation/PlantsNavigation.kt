@@ -12,6 +12,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
+import com.cropcare.feature.catalog.navigation.CatalogRoutes
 import com.cropcare.feature.plants.catalog.SpeciesCatalogScreen
 import com.cropcare.feature.plants.dashboard.DashboardScreen
 import com.cropcare.feature.plants.detail.PlantDetailScreen
@@ -61,7 +62,8 @@ fun NavGraphBuilder.plantsGraph(navController: NavHostController) {
             onPlantClick = { plantId ->
                 navController.navigate(PlantsRoutes.plantDetailRoute(plantId))
             },
-            onOpenSettings = { navController.navigate(SettingsRoutes.GENERAL_SETTINGS) }
+            onOpenSettings = { navController.navigate(SettingsRoutes.GENERAL_SETTINGS) },
+            onOpenSpeciesCatalog = { navController.navigate(PlantsRoutes.SPECIES_CATALOG_BROWSE) }
         )
     }
 
@@ -94,6 +96,16 @@ fun NavGraphBuilder.plantsGraph(navController: NavHostController) {
             onViewWateringHistory = { plantId ->
                 navController.navigate(WateringRoutes.wateringHistoryRoute(plantId))
             }
+        )
+    }
+
+    composable(PlantsRoutes.SPECIES_CATALOG_BROWSE) {
+        SpeciesCatalogScreen(
+            onNavigateBack = { navController.popBackStack() },
+            onSpeciesSelected = { speciesId, _ ->
+                navController.navigate(CatalogRoutes.careAdviceRoute(speciesId))
+            },
+            browseMode = true
         )
     }
 

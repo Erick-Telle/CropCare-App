@@ -15,6 +15,7 @@ import com.cropcare.core.data.repository.WateringRepositoryImpl
 import com.cropcare.core.domain.repository.ClimateRepository
 import com.cropcare.core.domain.repository.OnboardingRepository
 import com.cropcare.core.domain.repository.PlantRepository
+import com.cropcare.core.domain.repository.SpeciesCatalogSyncObserver
 import com.cropcare.core.domain.repository.SpeciesRepository
 import com.cropcare.core.domain.repository.WateringRepository
 import dagger.Binds
@@ -64,6 +65,12 @@ abstract class RepositoryModule {
     @Binds
     @Singleton
     abstract fun bindSpeciesRepository(impl: SpeciesRepositoryImpl): SpeciesRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindSpeciesCatalogSyncObserver(
+        impl: SpeciesRepositoryImpl
+    ): SpeciesCatalogSyncObserver
 
     @Binds
     @Singleton

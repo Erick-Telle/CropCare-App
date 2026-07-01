@@ -65,7 +65,11 @@ fun ClimateConfigScreen(
                     value = uiState.temperature,
                     onValueChange = viewModel::onTemperatureChange,
                     valueRange = 0f..45f,
-                    steps = 44
+                    steps = 44,
+                    colors = androidx.compose.material3.SliderDefaults.colors(
+                        thumbColor = MaterialTheme.colorScheme.primary,
+                        activeTrackColor = MaterialTheme.colorScheme.primary
+                    )
                 )
 
                 Text(
@@ -77,7 +81,11 @@ fun ClimateConfigScreen(
                     value = uiState.humidity,
                     onValueChange = viewModel::onHumidityChange,
                     valueRange = 0f..100f,
-                    steps = 19
+                    steps = 19,
+                    colors = androidx.compose.material3.SliderDefaults.colors(
+                        thumbColor = MaterialTheme.colorScheme.primary,
+                        activeTrackColor = MaterialTheme.colorScheme.primary
+                    )
                 )
 
                 Text(
@@ -93,15 +101,15 @@ fun ClimateConfigScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                        containerColor = MaterialTheme.colorScheme.surfaceContainer
                     ),
-                    shape = RoundedCornerShape(12.dp)
+                    shape = RoundedCornerShape(20.dp)
                 ) {
                     Text(
                         text = uiState.previewText,
                         modifier = Modifier.padding(16.dp),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                        color = MaterialTheme.colorScheme.onSurface
                     )
                 }
 

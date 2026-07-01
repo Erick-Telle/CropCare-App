@@ -9,6 +9,7 @@ object PlantsRoutes {
     const val EDIT_PLANT = "edit_plant/{plantId}"
     const val PLANT_DETAIL = "plant_detail/{plantId}"
     const val SPECIES_CATALOG = "species_catalog"
+    const val SPECIES_CATALOG_BROWSE = "species_catalog_browse"
 
     const val ARG_PLANT_ID = "plantId"
     const val SELECTED_SPECIES_ID = "selected_species_id"

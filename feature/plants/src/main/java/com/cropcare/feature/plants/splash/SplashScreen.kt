@@ -1,6 +1,7 @@
 package com.cropcare.feature.plants.splash
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -8,6 +9,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocalFlorist
 import androidx.compose.material3.Icon
@@ -18,6 +20,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -26,6 +29,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cropcare.core.ui.components.LoadingView
 import com.cropcare.core.ui.theme.AccentEmerald
 import com.cropcare.core.ui.theme.DarkBackground
+import com.cropcare.core.ui.theme.GlowGreen
 import kotlinx.coroutines.delay
 
 @Composable
@@ -68,13 +72,33 @@ fun SplashScreen(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Icon(
-                    imageVector = Icons.Default.LocalFlorist,
-                    contentDescription = null,
-                    modifier = Modifier.size(96.dp),
-                    tint = MaterialTheme.colorScheme.primary
-                )
-                Spacer(modifier = Modifier.height(16.dp))
+                Box(
+                    modifier = Modifier
+                        .size(120.dp)
+                        .clip(RoundedCornerShape(28.dp))
+                        .background(
+                            Brush.radialGradient(
+                                colors = listOf(
+                                    AccentEmerald.copy(alpha = 0.25f),
+                                    GlowGreen.copy(alpha = 0.08f)
+                                )
+                            )
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = AccentEmerald.copy(alpha = 0.4f),
+                            shape = RoundedCornerShape(28.dp)
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.LocalFlorist,
+                        contentDescription = null,
+                        modifier = Modifier.size(64.dp),
+                        tint = AccentEmerald
+                    )
+                }
+                Spacer(modifier = Modifier.height(20.dp))
                 Text(
                     text = "CropCare",
                     style = MaterialTheme.typography.displayMedium,

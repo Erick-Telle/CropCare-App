@@ -6,6 +6,8 @@ import androidx.lifecycle.viewModelScope
 import com.cropcare.core.domain.model.Plant
 import com.cropcare.core.domain.model.Species
 import com.cropcare.core.domain.model.WateringRecord
+import com.cropcare.core.domain.usecase.CancelPlantNotificationUseCase
+import com.cropcare.core.domain.usecase.DeletePlantUseCase
 import com.cropcare.core.domain.usecase.GetNextWateringDateUseCase
 import com.cropcare.core.domain.usecase.GetPlantByIdUseCase
 import com.cropcare.core.domain.usecase.GetPlantWateringStatusUseCase
@@ -13,6 +15,7 @@ import com.cropcare.core.domain.usecase.GetSpeciesByIdUseCase
 import com.cropcare.core.domain.usecase.GetWateringHistoryUseCase
 import com.cropcare.core.domain.usecase.RegisterWateringUseCase
 import com.cropcare.core.domain.usecase.SavePlantUseCase
+import com.cropcare.feature.plants.form.PlantPhotoStorage
 import com.cropcare.feature.plants.navigation.PlantsRoutes
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -42,7 +45,10 @@ data class PlantDetailUiState(
     val wateringNotes: String = "",
     val isRegisteringWatering: Boolean = false,
     val nextWateringText: String = "",
-    val settingsSaved: Boolean = false
+    val settingsSaved: Boolean = false,
+    val showDeleteDialog: Boolean = false,
+    val isDeleting: Boolean = false,
+    val plantDeleted: Boolean = false
 )
 
 @HiltViewModel
@@ -54,7 +60,9 @@ class PlantDetailViewModel @Inject constructor(
     private val savePlantUseCase: SavePlantUseCase,
     private val registerWateringUseCase: RegisterWateringUseCase,
     private val getNextWateringDateUseCase: GetNextWateringDateUseCase,
-    private val getPlantWateringStatusUseCase: GetPlantWateringStatusUseCase
+    private val getPlantWateringStatusUseCase: GetPlantWateringStatusUseCase,
+    private val deletePlantUseCase: DeletePlantUseCase,
+    private val cancelPlantNotificationUseCase: CancelPlantNotificationUseCase
 ) : ViewModel() {
 
     private val plantId: Long = checkNotNull(savedStateHandle[PlantsRoutes.ARG_PLANT_ID])
@@ -96,11 +104,43 @@ class PlantDetailViewModel @Inject constructor(
                             wateringNotes = current.wateringNotes,
                             isRegisteringWatering = current.isRegisteringWatering,
                             nextWateringText = nextText,
-                            settingsSaved = current.settingsSaved
+                            settingsSaved = current.settingsSaved,
+                            showDeleteDialog = current.showDeleteDialog,
+                            isDeleting = current.isDeleting,
+                            plantDeleted = current.plantDeleted
                         )
                     }
                 }
         }
+    }
+
+    fun showDeleteConfirmation() {
+        _uiState.update { it.copy(showDeleteDialog = true) }
+    }
+
+    fun dismissDeleteDialog() {
+        _uiState.update { it.copy(showDeleteDialog = false) }
+    }
+
+    fun confirmDeletePlant() {
+        val plant = _uiState.value.plant ?: return
+        viewModelScope.launch {
+            _uiState.update { it.copy(isDeleting = true) }
+            cancelPlantNotificationUseCase(plant.id)
+            PlantPhotoStorage.deletePhoto(plant.fotoPath)
+            deletePlantUseCase(plant)
+            _uiState.update {
+                it.copy(
+                    isDeleting = false,
+                    showDeleteDialog = false,
+                    plantDeleted = true
+                )
+            }
+        }
+    }
+
+    fun consumePlantDeleted() {
+        _uiState.update { it.copy(plantDeleted = false) }
     }
 
     fun onTabSelected(index: Int) {

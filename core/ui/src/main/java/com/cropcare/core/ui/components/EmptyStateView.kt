@@ -7,6 +7,7 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,6 +32,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.cropcare.core.ui.theme.AccentEmerald
+import com.cropcare.core.ui.theme.GlowGreen
 
 @Composable
 fun EmptyStateView(
@@ -48,17 +51,37 @@ fun EmptyStateView(
     ) {
         Box(
             modifier = Modifier
-                .size(100.dp)
-                .clip(RoundedCornerShape(50))
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.1f)),
+                .size(112.dp)
+                .clip(RoundedCornerShape(56.dp))
+                .background(
+                    Brush.radialGradient(
+                        colors = listOf(
+                            AccentEmerald.copy(alpha = 0.18f),
+                            GlowGreen.copy(alpha = 0.05f)
+                        )
+                    )
+                )
+                .border(
+                    width = 1.dp,
+                    color = AccentEmerald.copy(alpha = 0.25f),
+                    shape = RoundedCornerShape(56.dp)
+                ),
             contentAlignment = Alignment.Center
         ) {
-            Icon(
-                imageVector = Icons.Outlined.LocalFlorist,
-                contentDescription = null,
-                modifier = Modifier.size(48.dp),
-                tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
-            )
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .clip(RoundedCornerShape(40.dp))
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Outlined.LocalFlorist,
+                    contentDescription = null,
+                    modifier = Modifier.size(44.dp),
+                    tint = MaterialTheme.colorScheme.primary
+                )
+            }
         }
         Spacer(modifier = Modifier.height(24.dp))
         Text(

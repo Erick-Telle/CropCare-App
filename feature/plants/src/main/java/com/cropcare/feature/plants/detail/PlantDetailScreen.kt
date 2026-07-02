@@ -18,12 +18,17 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Grass
 import androidx.compose.material.icons.filled.LocalFlorist
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material.icons.filled.WbSunny
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -32,6 +37,7 @@ import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -61,9 +67,50 @@ fun PlantDetailScreen(
     onNavigateBack: () -> Unit,
     onEditPlant: (Long) -> Unit,
     onViewWateringHistory: (Long) -> Unit,
+    onPlantDeleted: () -> Unit = onNavigateBack,
     viewModel: PlantDetailViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
+
+    LaunchedEffect(uiState.plantDeleted) {
+        if (uiState.plantDeleted) {
+            viewModel.consumePlantDeleted()
+            onPlantDeleted()
+        }
+    }
+
+    if (uiState.showDeleteDialog) {
+        AlertDialog(
+            onDismissRequest = viewModel::dismissDeleteDialog,
+            title = { Text("Eliminar planta") },
+            text = {
+                Text(
+                    "Se borrará \"${uiState.plant?.nombre ?: "esta planta"}\" junto con " +
+                        "su historial de riegos. Esta acción no se puede deshacer."
+                )
+            },
+            confirmButton = {
+                Button(
+                    onClick = viewModel::confirmDeletePlant,
+                    enabled = !uiState.isDeleting,
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    )
+                ) {
+                    Text(if (uiState.isDeleting) "Eliminando…" else "Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(
+                    onClick = viewModel::dismissDeleteDialog,
+                    enabled = !uiState.isDeleting
+                ) {
+                    Text("Cancelar")
+                }
+            }
+        )
+    }
 
     if (uiState.showWateringSheet && uiState.plant != null) {
         QuickWateringBottomSheet(
@@ -233,7 +280,8 @@ fun PlantDetailScreen(
                             onFrequencyChange = viewModel::onEditFrequencyChange,
                             onWaterAmountChange = viewModel::onEditWaterAmountChange,
                             onSave = viewModel::saveWateringSettings,
-                            onEditPlant = { onEditPlant(plant.id) }
+                            onEditPlant = { onEditPlant(plant.id) },
+                            onDeletePlant = viewModel::showDeleteConfirmation
                         )
                     }
                 }
@@ -361,7 +409,8 @@ private fun SettingsTab(
     onFrequencyChange: (String) -> Unit,
     onWaterAmountChange: (String) -> Unit,
     onSave: () -> Unit,
-    onEditPlant: () -> Unit
+    onEditPlant: () -> Unit,
+    onDeletePlant: () -> Unit
 ) {
     Column(
         modifier = Modifier
@@ -393,6 +442,49 @@ private fun SettingsTab(
         PrimaryButton(text = "Guardar ajustes", onClick = onSave)
 
         PrimaryButton(text = "Editar planta", onClick = onEditPlant)
+
+        Spacer(modifier = Modifier.height(8.dp))
+        HorizontalDivider(color = MaterialTheme.colorScheme.outline.copy(alpha = 0.3f))
+        Spacer(modifier = Modifier.height(4.dp))
+
+        Text(
+            text = "Zona de peligro",
+            style = MaterialTheme.typography.titleSmall,
+            fontWeight = FontWeight.SemiBold,
+            color = MaterialTheme.colorScheme.error
+        )
+        Text(
+            text = "Eliminar esta planta borrará también su historial de riegos y recordatorios.",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+
+        Button(
+            onClick = onDeletePlant,
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(52.dp),
+            shape = RoundedCornerShape(26.dp),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.15f),
+                contentColor = MaterialTheme.colorScheme.error
+            )
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Delete,
+                    contentDescription = null
+                )
+                Spacer(modifier = Modifier.padding(horizontal = 4.dp))
+                Text(
+                    text = "Eliminar planta",
+                    style = MaterialTheme.typography.labelLarge
+                )
+            }
+        }
     }
 }
 

@@ -7,14 +7,17 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.LocalFlorist
 import androidx.compose.material.icons.filled.WaterDrop
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.cropcare.core.domain.model.DashboardStats
 import com.cropcare.core.domain.model.WateringStatus
 import com.cropcare.core.ui.charts.BarChartLabels
 import com.cropcare.core.ui.charts.DonutChart
@@ -23,20 +26,27 @@ import com.cropcare.core.ui.charts.SimpleBarChart
 import com.cropcare.core.ui.components.ChartCard
 import com.cropcare.core.ui.components.StatsMiniCardItem
 import com.cropcare.core.ui.components.StatsMiniCardRow
+import com.cropcare.core.ui.theme.AccentEmerald
 import com.cropcare.core.ui.theme.StatusOk
 import com.cropcare.core.ui.theme.StatusOverdue
 import com.cropcare.core.ui.theme.StatusPending
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Locale
 
 @Composable
 fun DashboardStatsSection(
     allPlants: List<PlantWithSpecies>,
+    stats: DashboardStats,
     modifier: Modifier = Modifier
 ) {
     val total = allPlants.size
     val alDia = allPlants.count { it.plantWithStatus.status == WateringStatus.AL_DIA }
     val pendiente = allPlants.count { it.plantWithStatus.status == WateringStatus.PENDIENTE }
     val atrasada = allPlants.count { it.plantWithStatus.status == WateringStatus.ATRASADA }
+
+    val completedLabels = remember { last7DayLabels() }
+    val completedValues = stats.completedWateringsLast7Days.map { it.toFloat() }
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -55,18 +65,29 @@ fun DashboardStatsSection(
                 value = total.toString(),
                 icon = Icons.Default.LocalFlorist
             )
-            // TODO: Exponer totalWateringsMes desde GetAppUsageSummaryUseCase o agregado en DashboardViewModel
             StatsMiniCardItem(
                 label = "Riegos este mes",
-                value = "—",
+                value = stats.wateringsThisMonth.toString(),
                 icon = Icons.Default.WaterDrop
             )
-            // TODO: Exponer rachaConstanciaDias calculada desde historial de riegos sin atrasos
             StatsMiniCardItem(
                 label = "Racha",
-                value = "—",
-                icon = Icons.Default.WaterDrop
+                value = if (stats.streakDays > 0) "${stats.streakDays} d" else "0",
+                icon = Icons.Default.LocalFireDepartment
             )
+        }
+
+        ChartCard(
+            title = "Riegos completados",
+            subtitle = "Últimos 7 días"
+        ) {
+            SimpleBarChart(
+                labels = completedLabels,
+                values = completedValues,
+                barColor = AccentEmerald
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            BarChartLabels(labels = completedLabels)
         }
 
         ChartCard(
@@ -95,7 +116,6 @@ fun DashboardStatsSection(
             )
         }
 
-        // TODO: Gráfica de riegos completados por día requiere GetWateringHistoryUseCase agregado en DashboardViewModel
         if (total == 0) {
             Text(
                 text = "Agrega plantas para ver estadísticas detalladas.",
@@ -116,4 +136,14 @@ private fun scheduledCountsByWeekday(plants: List<PlantWithSpecies>): List<Float
         counts[dayIndex] += 1f
     }
     return counts.toList()
+}
+
+private fun last7DayLabels(): List<String> {
+    val formatter = SimpleDateFormat("EEE", Locale("es", "ES"))
+    val calendar = Calendar.getInstance()
+    return (6 downTo 0).map { daysAgo ->
+        val day = calendar.clone() as Calendar
+        day.add(Calendar.DAY_OF_YEAR, -daysAgo)
+        formatter.format(day.time).replaceFirstChar { it.uppercase() }
+    }
 }

@@ -95,6 +95,9 @@ fun NavGraphBuilder.plantsGraph(navController: NavHostController) {
             },
             onViewWateringHistory = { plantId ->
                 navController.navigate(WateringRoutes.wateringHistoryRoute(plantId))
+            },
+            onPlantDeleted = {
+                navController.popBackStack()
             }
         )
     }

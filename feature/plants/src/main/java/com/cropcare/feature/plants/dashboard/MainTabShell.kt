@@ -1,5 +1,9 @@
 package com.cropcare.feature.plants.dashboard
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -50,10 +54,18 @@ fun MainTabShell(
                 .padding(padding)
                 .background(MaterialTheme.colorScheme.background)
         ) {
-            when (selectedTab) {
-                BottomNavItem.HOME -> homeContent()
-                BottomNavItem.STATS -> statsContent()
-                else -> homeContent()
+            AnimatedContent(
+                targetState = selectedTab,
+                transitionSpec = {
+                    fadeIn(initialAlpha = 0.6f) togetherWith fadeOut(targetAlpha = 0.6f)
+                },
+                label = "tabContent"
+            ) { tab ->
+                when (tab) {
+                    BottomNavItem.HOME -> homeContent()
+                    BottomNavItem.STATS -> statsContent()
+                    else -> homeContent()
+                }
             }
         }
     }

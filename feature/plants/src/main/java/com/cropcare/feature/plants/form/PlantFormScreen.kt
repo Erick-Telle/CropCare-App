@@ -11,24 +11,27 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.LocalFlorist
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -48,20 +51,24 @@ fun PlantFormScreen(
     viewModel: PlantFormViewModel = hiltViewModel()
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(state.saveSuccess) {
         if (state.saveSuccess) {
+            val message = if (state.fotoPath != null) {
+                "Planta guardada con foto"
+            } else {
+                "Planta guardada correctamente"
+            }
+            snackbarHostState.showSnackbar(message)
             viewModel.consumeSaveSuccess()
             onSaveSuccess()
         }
     }
 
-    LaunchedEffect(Unit) {
-        // Species selection is handled via callback from navigation
-    }
-
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             CropCareTopAppBar(
                 title = if (state.plantId > 0) "Editar planta" else "Agregar planta",
@@ -82,6 +89,11 @@ fun PlantFormScreen(
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 Spacer(modifier = Modifier.height(8.dp))
+
+                PlantPhotoSection(
+                    photoPath = state.fotoPath,
+                    onPhotoPathChange = viewModel::onFotoPathChange
+                )
 
                 InputField(
                     value = state.nombre,

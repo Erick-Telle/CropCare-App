@@ -56,9 +56,9 @@ fun DashboardScreen(
             when {
                 uiState.isLoading -> LoadingView()
                 uiState.isEmpty -> EmptyStateView(
-                    title = "Sin plantas aún",
-                    message = "Agrega tu primera planta para comenzar a recibir recordatorios de riego personalizados.",
-                    action = { PrimaryButton(text = "Agregar planta", onClick = onAddPlant) }
+                    title = "Ninguna planta aún",
+                    message = "Tu jardín está esperando. Agrega tu primera planta y recibe recordatorios de riego personalizados.",
+                    action = { PrimaryButton(text = "Agregar mi primera planta", onClick = onAddPlant) }
                 )
                 else -> PullToRefreshBox(
                     isRefreshing = isRefreshing,
@@ -81,7 +81,10 @@ fun DashboardScreen(
                         }
 
                         item {
-                            DashboardStatsSection(allPlants = allPlants)
+                            DashboardStatsSection(
+                                allPlants = allPlants,
+                                stats = uiState.stats
+                            )
                             Spacer(modifier = Modifier.height(8.dp))
                         }
 
@@ -167,7 +170,10 @@ fun DashboardScreen(
                         CropCareTopAppBar(title = "Estadísticas", transparent = true)
                     }
                     item {
-                        DashboardStatsSection(allPlants = allPlants)
+                        DashboardStatsSection(
+                            allPlants = allPlants,
+                            stats = uiState.stats
+                        )
                     }
                 }
             }
